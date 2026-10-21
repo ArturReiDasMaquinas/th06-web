@@ -276,20 +276,59 @@ var DEFAULT_MIRROR_FILES = [
     return init();
   }
 
+  /* O canvas do jogo. O SDL2 do Emscripten usa o elemento com o id
+     "canvas" (estao fixo no SDL), entao e esse que a gente cria. */
+  function ensureCanvas() {
+    var canvas = document.getElementById("canvas");
+    if (!canvas) {
+      canvas = document.createElement("canvas");
+      canvas.id = "canvas";
+      canvas.width = 1024;
+      canvas.height = 576;
+      canvas.tabIndex = 0;
+      document.body.appendChild(canvas);
+    }
+    return canvas;
+  }
+
+  /* O motor e o do APK: o mesmo C++, compilado para WebAssembly. Os
+     arquivos do jogo (os .DAT do patch ingles e o BGM em Ogg) vao para o
+     sistema de arquivos virtual do Emscripten, e o jogo roda em cima
+     deles. */
   function startGame(map) {
     setStatus("Carregando o motor…");
     busy(true);
+    var canvas = ensureCanvas();
     return importModule()
       .then(function (mod) {
-        return initModule(mod).then(function () { return mod.start_game(map); });
+        var factory = mod.default || mod;
+        return factory({
+          canvas: canvas,
+          print: function (t) { console.log("[th06] " + t); },
+          printErr: function (t) { console.error("[th06] " + t); }
+        });
+      })
+      .then(function (Module) {
+        Object.keys(map).forEach(function (name) {
+          var path = "/" + name.replace(/^\/+/, "");
+          /* As faixas de musica ficam na pasta bgm/, onde o jogo procura
+             (o .ogg ePreferred; o .wav e o reserva). */
+          if (/^th06_\d+\.(ogg|wav|mp3)$/i.test(name)) {
+            path = "/bgm/" + name;
+          }
+          var dir = path.substring(0, path.lastIndexOf("/"));
+          if (dir && dir !== "/") {
+            try { Module.FS.mkdirTree(dir); } catch (e) { /* ja existe */ }
+          }
+          Module.FS.writeFile(path, map[name]);
+        });
+        Module.th06_start();
+        return Module;
       })
       .then(function () {
         document.body.classList.add("playing");
-        var canvas = document.getElementById("th06-canvas");
-        if (canvas) {
-          canvas.addEventListener("dblclick", toggleFullscreen);
-          canvas.focus();
-        }
+        canvas.addEventListener("dblclick", toggleFullscreen);
+        canvas.focus();
         setStatus("");
         hideProgress();
         busy(false);

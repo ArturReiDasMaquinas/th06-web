@@ -250,17 +250,17 @@ body.playing #fsBtn { display: none; }
 /* The drawing buffer stays 640x480; CSS scales it to the viewport keeping
    4:3 with nearest-neighbour pixels. !important beats the inline size that
    winit sets on the canvas. */
-#th06-canvas {
+#canvas {
   display: block;
   background: #000;
   image-rendering: pixelated;
-  aspect-ratio: 4 / 3;
-  width: min(100vw, 133.333vh) !important;
+  aspect-ratio: 16 / 9;
+  width: min(100vw, 177.778vh) !important;
   height: auto !important;
   max-height: 100vh;
 }
 
-#th06-canvas:fullscreen {
+#canvas:fullscreen {
   width: 100vw !important;
   height: 100vh !important;
   object-fit: contain;
