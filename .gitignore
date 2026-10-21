@@ -3,7 +3,6 @@
 
 # wasm-pack / node
 node_modules/
-pkg/
 
 # Log do servidor local
 serve.log
