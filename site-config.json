@@ -1,16 +1,16 @@
 {
   "$comment": "Configuração do site TH06-web. Edite e recarregue — não precisa rebuild.",
 
-  "portalUrl": "https://YOUR-USERNAME.github.io/PortalDosGames/",
+  "portalUrl": "https://arturreidasmaquinas.github.io/PortalDosGames/",
 
   "dataMirror": {
     "$comment": "Onde buscar os arquivos do jogo quando o visitante usa o botão 'Carregar do espelho'. TESTADO NO NAVEGADOR (CORS de verdade): raw.githubusercontent.com OK, cdn.jsdelivr.net OK (limite de 20 MB/arquivo), outro repo do mesmo usuario no GitHub Pages OK (e mesma origem, nem precisa de CORS). Dropbox pelo LINK COMPARTILHADO NAO funciona (o 302 de redirecionamento nao manda Access-Control-Allow-Origin e o navegador bloqueia) — mas a API do Dropbox (/2/files/download_zip com token) funciona, inclusive o preflight. O padrao do site e o visitante escolher a propria pasta — nao precisa de espelho nenhum.",
 
     "enabled": true,
 
-    "$comment_url": "ESCOLHA UM: (a) repo 'th06-data' do mesmo usuario -> 'https://SEU-USUARIO.github.io/th06-data'  [use preparar-espelho.ps1]  |  (b) raw.githubusercontent -> 'https://raw.githubusercontent.com/SEU-USUARIO/th06-data/main'  |  (c) API do Dropbox -> 'https://content.dropboxapi.com/2/files/download_zip' com format zip, method POST, headers Authorization e body com o caminho da pasta.",
+    "$comment_url": "O repo th06-data (https://github.com/ArturReiDasMaquinas/th06-data) e mesmo dono do site, entao https://arturreidasmaquinas.github.io/th06-data e MESMA ORIGEM: nao tem CORS nenhum. Para gerar a pasta, use preparar-espelho.ps1.",
 
-    "url": "./data",
+    "url": "https://arturreidasmaquinas.github.io/th06-data",
 
     "$comment_format": "'files' = um arquivo por vez, em <url>/<caminho>.  'zip' = <url> devolve UM .zip com tudo dentro (descompactado no navegador por assets/js/zip.js).",
 
@@ -26,7 +26,7 @@
 
     "body": "",
 
-    "$comment_files": "Os caminhos sao relativos. O 'bgm/' e opcional — sem ele o jogo roda em silencio. No modo zip, o caminho e casado pelo FIM do nome dentro do zip (entao serve tanto 'TL.DAT' quanto 'bgm/th06_01.wav', com ou sem a pasta da frente).",
+    "$comment_files": "Os caminhos sao relativos. O 'bgm/' e opcional — sem ele o jogo roda em silencio. O BGM esta em Ogg Vorbis (37 MB em vez de 310 MB de WAV): o motor decodifica Ogg/MP3 pelo decoder nativo do navegador. No modo zip, o caminho e casado pelo FIM do nome dentro do zip (entao serve tanto 'TL.DAT' quanto 'bgm/th06_01.ogg', com ou sem a pasta da frente).",
 
     "files": [
       "TL.DAT",
@@ -34,23 +34,23 @@
       "ST.DAT",
       "IN.DAT",
       "th06e_ST.DAT",
-      "bgm/th06_01.wav",
-      "bgm/th06_02.wav",
-      "bgm/th06_03.wav",
-      "bgm/th06_04.wav",
-      "bgm/th06_05.wav",
-      "bgm/th06_06.wav",
-      "bgm/th06_07.wav",
-      "bgm/th06_08.wav",
-      "bgm/th06_09.wav",
-      "bgm/th06_10.wav",
-      "bgm/th06_11.wav",
-      "bgm/th06_12.wav",
-      "bgm/th06_13.wav",
-      "bgm/th06_14.wav",
-      "bgm/th06_15.wav",
-      "bgm/th06_16.wav",
-      "bgm/th06_17.wav"
+      "bgm/th06_01.ogg",
+      "bgm/th06_02.ogg",
+      "bgm/th06_03.ogg",
+      "bgm/th06_04.ogg",
+      "bgm/th06_05.ogg",
+      "bgm/th06_06.ogg",
+      "bgm/th06_07.ogg",
+      "bgm/th06_08.ogg",
+      "bgm/th06_09.ogg",
+      "bgm/th06_10.ogg",
+      "bgm/th06_11.ogg",
+      "bgm/th06_12.ogg",
+      "bgm/th06_13.ogg",
+      "bgm/th06_14.ogg",
+      "bgm/th06_15.ogg",
+      "bgm/th06_16.ogg",
+      "bgm/th06_17.ogg"
     ]
   }
 }
