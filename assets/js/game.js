@@ -36,6 +36,10 @@
     dataMirror: {
       enabled: true,
       url: "",
+      format: "files",   // "files" (um por arquivo) | "zip" (um .zip só)
+      method: "GET",
+      headers: {},
+      body: "",
       files: DEFAULT_MIRROR_FILES
     },
     portalUrl: "../PortalDosGames/"
@@ -118,11 +122,14 @@
   }
 
   function loadConfig() {
-    /* Override de espelho pela URL: index.html?mirror=https://exemplo.com
-       Útil para testar sem editar o site-config.json. Tem prioridade
-       sobre o valor do config. */
+    /* Override pela URL, para testar sem editar o site-config.json:
+         index.html?mirror=https://exemplo.com          -> troca a URL
+         index.html?mirror=...&format=zip                -> forca o modo zip
+       O override tem prioridade sobre o valor do config. */
     var override = new URLSearchParams(window.location.search).get("mirror");
+    var formatOverride = new URLSearchParams(window.location.search).get("format");
     if (override) CONFIG.dataMirror.url = override.replace(/\/+$/, "");
+    if (formatOverride) CONFIG.dataMirror.format = formatOverride;
 
     if (!window.fetch) return Promise.resolve();
     return fetch("site-config.json", { cache: "no-cache" })
@@ -135,6 +142,12 @@
           if (cfg.dataMirror.url && !override) {
             CONFIG.dataMirror.url = cfg.dataMirror.url.replace(/\/+$/, "");
           }
+          if (cfg.dataMirror.format) {
+            CONFIG.dataMirror.format = cfg.dataMirror.format;
+          }
+          if (cfg.dataMirror.method) CONFIG.dataMirror.method = cfg.dataMirror.method;
+          if (cfg.dataMirror.headers) CONFIG.dataMirror.headers = cfg.dataMirror.headers;
+          if (cfg.dataMirror.body) CONFIG.dataMirror.body = cfg.dataMirror.body;
           if (Array.isArray(cfg.dataMirror.files) && cfg.dataMirror.files.length) {
             CONFIG.dataMirror.files = cfg.dataMirror.files;
           }
@@ -302,16 +315,31 @@
     });
   }
 
-  /* ----------------------------------------------- 2. carregar do espelho */
+  /* ----------------------------------------------- 2. carregar do espelho
+
+     Dois modos:
+
+     "files" (padrão) — cada arquivo é buscado em <url>/<caminho>.
+                         Ex.: url = "https://user.github.io/th06-data"
+
+     "zip"            — <url> devolve UM .zip com tudo dentro; descompactamos
+                         no navegador. É o formato da API do Dropbox
+                         (/2/files/download_zip) e de qualquer host que sirva
+                         um zip. Pode mandar cabeçalhos (Authorization) e corpo.
+   */
 
   function loadFromMirror() {
-    var base = CONFIG.dataMirror.url;
-    if (!base) {
-      setStatus("Nenhum espelho configurado em site-config.json.", "error");
-      return Promise.resolve(null);
+    var m = CONFIG.dataMirror;
+    if (!m.url) {
+      return Promise.reject(new Error("nenhum espelho configurado"));
     }
 
-    var files = CONFIG.dataMirror.files;
+    if (m.format === "zip") return loadFromMirrorZip(m);
+    return loadFromMirrorFiles(m);
+  }
+
+  function loadFromMirrorFiles(m) {
+    var files = m.files;
     setStatus("Baixando do espelho…");
     setProgress(1, "Baixando…");
 
@@ -320,7 +348,7 @@
 
     return files.reduce(function (chain, path) {
       return chain.then(function () {
-        return fetch(base + "/" + path)
+        return fetch(m.url + "/" + path)
           .then(function (r) {
             if (!r.ok) throw new Error("HTTP " + r.status + " em " + path);
             return r.arrayBuffer();
@@ -344,6 +372,44 @@
           return map;
         });
     });
+  }
+
+  function loadFromMirrorZip(m) {
+    setStatus("Baixando o espelho…");
+    setProgress(5, "Baixando…");
+
+    var opts = { method: m.method || "GET", headers: m.headers || {} };
+    if (m.body) opts.body = m.body;
+
+    return fetch(m.url, opts)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.arrayBuffer();
+      })
+      .then(function (buf) {
+        setProgress(55, "Descompactando…");
+        if (!window.Zip) throw new Error("assets/js/zip.js não foi carregado");
+        return window.Zip.unzip(buf, { files: m.files });
+      })
+      .then(function (entries) {
+        /* a chave precisa ser o nome do arquivo, não o caminho dentro do zip */
+        var map = {};
+        entries.forEach(function (bytes, path) { map[basename(path)] = bytes; });
+
+        var missing = REQUIRED.filter(function (n) { return !(n in map); });
+        if (missing.length) {
+          throw new Error("O zip não tem: " + missing.join(", ") +
+                          ". conferir o caminho da pasta dentro do zip.");
+        }
+        showFiles(map);
+        setProgress(96, "Salvando…");
+        return idbSave(map)
+          .catch(function () { /* cota cheia: seguimos sem cache */ })
+          .then(function () {
+            setProgress(100, "Pronto");
+            return map;
+          });
+      });
   }
 
   /* -------------------------------------------------------- fullscreen */
