@@ -15,3 +15,14 @@ data/
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# artefatos de teste
+__oggtest/
+__oggtest.html
+__corstest.html
+__dbxtest.html
+__smoketest.html
+__modtest.html
+__raftest.html
+__teste*.zip
+__gamedata
