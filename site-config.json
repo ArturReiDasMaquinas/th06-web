@@ -4,10 +4,15 @@
   "portalUrl": "https://YOUR-USERNAME.github.io/PortalDosGames/",
 
   "dataMirror": {
-    "$comment": "Onde buscar os arquivos do jogo quando o visitante usa o botão 'Carregar do espelho'. Coloque os arquivos em: TL.DAT, CM.DAT, ST.DAT, IN.DAT, th06e_ST.DAT e bgm/th06_01.wav ... bgm/th06_17.wav. Relativo a esta mesma pasta do site, ou uma URL absoluta (CDN, outro domínio). ATENÇÃO: esses arquivos são © ZUN / Team Shanghai Alice — não os distribua publicamente sem autorização. O padrão './data' só funciona se você mesmo colocar os arquivos lá.",
+    "$comment": "Onde buscar os arquivos do jogo quando o visitante usa o botão 'Carregar do espelho'. TESTADO NO NAVEGADOR (CORS): raw.githubusercontent.com OK, cdn.jsdelivr.net OK (mas tem limite de 20 MB por arquivo), outro repo do mesmo usuario no GitHub Pages OK (e mesma origem, nem precisa de CORS). Dropbox NAO funciona (o 302 de redirecionamento nao manda Access-Control-Allow-Origin e o navegador bloqueia) e GitHub Releases tb nao. O padrao do site e o visitante escolher a propria pasta — nao precisa de espelho nenhum.",
 
     "enabled": true,
+
+    "$comment_url": "Prefira um repo 'th06-data' no mesmo usuario: https://SEU-USUARIO.github.io/th06-data  (mesma origem do site, zero CORS). Para gerar a pasta, use preparar-espelho.ps1.",
+
     "url": "./data",
+
+    "$comment_files": "Os caminhos sao relativos a 'url'. O 'bgm/' e opcional — sem ele o jogo roda em silencio.",
 
     "files": [
       "TL.DAT",

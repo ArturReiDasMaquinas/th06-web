@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Recompila o motor do Touhou 6 para WebAssembly e atualiza ./pkg.
 
