@@ -1,0 +1,327 @@
+/* ==========================================================================
+   TH06-web — game page styles
+   Theme mirrors the Portal dos Games site (assets/css/style.css).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Brand row
+   -------------------------------------------------------------------------- */
+
+.site-header--game { background: rgba(10, 9, 16, 0.86); }
+
+.game-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-brand__jp {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  letter-spacing: 0.22em;
+  color: var(--scarlet);
+  text-shadow: 0 0 20px rgba(208, 26, 74, 0.5);
+}
+
+.game-brand__en {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+}
+
+.game-brand__en small {
+  display: block;
+  font-family: var(--font);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: -2px;
+}
+
+.backlink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color .15s, color .15s;
+}
+.backlink:hover { color: var(--text); border-color: var(--scarlet); }
+
+/* --------------------------------------------------------------------------
+   Launcher
+   -------------------------------------------------------------------------- */
+
+.launcher {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 46px 0 10px;
+}
+
+.launcher__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5.2vw, 3.2rem);
+  line-height: 1.06;
+  letter-spacing: 0.03em;
+  margin: 0 0 10px;
+}
+
+.launcher__title em {
+  font-style: normal;
+  background: linear-gradient(100deg, var(--scarlet) 10%, var(--gold) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.launcher__jp {
+  font-family: var(--font-display);
+  letter-spacing: 0.36em;
+  color: var(--scarlet);
+  font-size: 0.9rem;
+  margin: 0 0 16px;
+}
+
+.launcher__lead { color: var(--muted); max-width: 64ch; margin: 0 0 26px; }
+
+/* --------------------------------------------------------------------------
+   Dropzone
+   -------------------------------------------------------------------------- */
+
+.dropzone {
+  position: relative;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(208, 26, 74, 0.05), transparent),
+    var(--surface);
+  padding: 40px 28px;
+  text-align: center;
+  transition: border-color .16s, background .16s, transform .16s;
+}
+
+.dropzone.is-over {
+  border-color: var(--scarlet);
+  background:
+    linear-gradient(180deg, rgba(208, 26, 74, 0.16), transparent),
+    var(--surface);
+  transform: scale(1.006);
+}
+
+.dropzone__icon { font-size: 2.6rem; line-height: 1; margin-bottom: 12px; }
+
+.dropzone__title {
+  font-family: var(--font-display);
+  font-size: 1.16rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
+}
+
+.dropzone__hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 20px; }
+
+.dropzone__actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+/* the real <input> is hidden; the button above triggers it */
+.dropzone input[type=file] { display: none; }
+
+.btn--host {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+.btn--host:hover { border-color: var(--gold); color: var(--gold); }
+
+.btn[disabled] { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+/* --------------------------------------------------------------------------
+   Progress
+   -------------------------------------------------------------------------- */
+
+.progress {
+  margin-top: 22px;
+  display: none;
+}
+
+.progress.is-visible { display: block; }
+
+.progress__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.progress__bar {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--scarlet), var(--gold));
+  transition: width .2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Status / errors
+   -------------------------------------------------------------------------- */
+
+.status {
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  min-height: 1.2em;
+  text-align: center;
+}
+
+.status--error { color: #ff6b81; }
+.status--ok { color: #7ee0a5; }
+
+.filelist {
+  margin: 18px auto 0;
+  max-width: 560px;
+  text-align: left;
+  display: none;
+}
+
+.filelist.is-visible { display: block; }
+
+.filelist__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin: 0 0 8px;
+}
+
+.filelist ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filelist li {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.filelist li.is-missing { color: #ff6b81; border-color: rgba(255,107,129,.4); }
+
+/* --------------------------------------------------------------------------
+   Game canvas
+   -------------------------------------------------------------------------- */
+
+body.playing {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body.playing .site-header,
+body.playing .launcher,
+body.playing .site-footer,
+body.playing .info-sections,
+body.playing #fsBtn { display: none; }
+
+/* The drawing buffer stays 640x480; CSS scales it to the viewport keeping
+   4:3 with nearest-neighbour pixels. !important beats the inline size that
+   winit sets on the canvas. */
+#th06-canvas {
+  display: block;
+  background: #000;
+  image-rendering: pixelated;
+  aspect-ratio: 4 / 3;
+  width: min(100vw, 133.333vh) !important;
+  height: auto !important;
+  max-height: 100vh;
+}
+
+#th06-canvas:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: contain;
+  max-height: none;
+}
+
+#fsBtn {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 10;
+  opacity: 0.55;
+  background: var(--surface);
+  color: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+#fsBtn:hover { opacity: 1; }
+
+/* --------------------------------------------------------------------------
+   Info sections (under the launcher)
+   -------------------------------------------------------------------------- */
+
+.info-sections { padding-bottom: 70px; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 16px; }
+
+.requirement {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.requirement:last-child { border-bottom: 0; }
+.requirement__ok { color: #7ee0a5; flex: none; }
+.requirement__no { color: var(--faint); flex: none; }
+
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer { margin-top: 0; }

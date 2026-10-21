@@ -1,0 +1,14 @@
+# Build output do Rust (603 MB — não versionar)
+/target/
+
+# wasm-pack / node
+node_modules/
+pkg/
+
+# Log do servidor local
+serve.log
+
+# Sistema
+Thumbs.db
+.DS_Store
+desktop.ini

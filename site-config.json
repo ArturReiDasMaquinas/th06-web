@@ -1,0 +1,37 @@
+{
+  "$comment": "Configuração do site TH06-web. Edite e recarregue — não precisa rebuild.",
+
+  "portalUrl": "https://YOUR-USERNAME.github.io/PortalDosGames/",
+
+  "dataMirror": {
+    "$comment": "Onde buscar os arquivos do jogo quando o visitante usa o botão 'Carregar do espelho'. Coloque os arquivos em: TL.DAT, CM.DAT, ST.DAT, IN.DAT, th06e_ST.DAT e bgm/th06_01.wav ... bgm/th06_17.wav. Relativo a esta mesma pasta do site, ou uma URL absoluta (CDN, outro domínio). ATENÇÃO: esses arquivos são © ZUN / Team Shanghai Alice — não os distribua publicamente sem autorização. O padrão './data' só funciona se você mesmo colocar os arquivos lá.",
+
+    "enabled": true,
+    "url": "./data",
+
+    "files": [
+      "TL.DAT",
+      "CM.DAT",
+      "ST.DAT",
+      "IN.DAT",
+      "th06e_ST.DAT",
+      "bgm/th06_01.wav",
+      "bgm/th06_02.wav",
+      "bgm/th06_03.wav",
+      "bgm/th06_04.wav",
+      "bgm/th06_05.wav",
+      "bgm/th06_06.wav",
+      "bgm/th06_07.wav",
+      "bgm/th06_08.wav",
+      "bgm/th06_09.wav",
+      "bgm/th06_10.wav",
+      "bgm/th06_11.wav",
+      "bgm/th06_12.wav",
+      "bgm/th06_13.wav",
+      "bgm/th06_14.wav",
+      "bgm/th06_15.wav",
+      "bgm/th06_16.wav",
+      "bgm/th06_17.wav"
+    ]
+  }
+}

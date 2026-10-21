@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Touhou 6 — 東方紅魔郷 · WebAssembly</title>
+<meta name="description" content="Touhou 6: the Embodiment of Scarlet Devil rodando direto no navegador, em Rust + WebAssembly. Sem emulador, sem instalar nada." />
+<meta name="theme-color" content="#0a0910" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/game.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23a30f36'/><text y='70' x='50' text-anchor='middle' font-size='52' fill='%23fff'>桜</text></svg>" />
+</head>
+<body>
+
+<header class="site-header site-header--game">
+  <div class="wrap site-header__inner">
+    <div class="game-brand">
+      <span class="game-brand__jp">東方紅魔郷</span>
+      <span class="game-brand__en">Touhou 6<small>WebAssembly · Rust</small></span>
+    </div>
+    <a class="backlink" data-config="portalUrl" data-config-attr="href" href="../PortalDosGames/">← Portal dos Games</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- --------------------------------------------------------- launcher -->
+  <section class="launcher">
+    <p class="launcher__jp">東方紅魔郷</p>
+    <h1 class="launcher__title">Touhou 6<br /><em>the Embodiment of Scarlet Devil</em></h1>
+    <p class="launcher__lead">
+      O bullet-hell clássico de ZUN, reconstruído do zero em Rust e compilado
+      para WebAssembly. Roda os arquivos <strong>originais</strong> do jogo
+      dentro do seu navegador — 640×480, 60 Hz, WebGL2 e Web Audio. Nenhum
+      emulador, nenhuma instalação.
+    </p>
+
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone__icon">🌸</div>
+      <p class="dropzone__title">Escolha a pasta do Touhou 6</p>
+      <p class="dropzone__hint">
+        A pasta que contém <code>TL.DAT</code>, <code>CM.DAT</code>,
+        <code>ST.DAT</code>, <code>IN.DAT</code>, <code>th06e_ST.DAT</code>
+        e a subpasta <code>bgm/</code>.<br />
+        Os arquivos são lidos no seu PC e <strong>nunca são enviados</strong>
+        para nenhum servidor.
+      </p>
+      <div class="dropzone__actions">
+        <button class="btn btn--primary" id="pickBtn" type="button">📁 Selecionar pasta do jogo</button>
+        <button class="btn btn--host" id="hostBtn" type="button">🌐 Carregar do espelho</button>
+        <button class="btn btn--gold" id="resumeBtn" type="button" hidden>▶ Continuar (arquivos salvos)</button>
+        <button class="btn btn--ghost btn--sm" id="clearCacheBtn" type="button" hidden>Apagar cache local</button>
+      </div>
+      <input id="folderInput" type="file" webkitdirectory directory multiple />
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="progress__row">
+        <span id="progressLabel">Preparando…</span>
+        <span>0%</span>
+      </div>
+      <div class="progress__bar"><div class="progress__fill" id="progressFill"></div></div>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <div class="filelist" id="fileList"></div>
+  </section>
+
+  <!-- ------------------------------------------------------- informações -->
+  <div class="info-sections">
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="section__title">Controles <small>Teclado</small></h2>
+        </div>
+        <div class="panel" style="padding:6px 20px">
+          <table class="table">
+            <tbody>
+              <tr><td><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td><td>Mover</td></tr>
+              <tr><td><kbd>Z</kbd></td><td>Atirar / confirmar</td></tr>
+              <tr><td><kbd>X</kbd></td><td>Bomb / voltar</td></tr>
+              <tr><td><kbd>Shift</kbd></td><td>Foco (movimento lento)</td></tr>
+              <tr><td><kbd>Esc</kbd></td><td>Pausa / voltar</td></tr>
+              <tr><td><kbd>F</kbd></td><td>Tela cheia</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="section__title">O que você precisa <small>Verificação automática</small></h2>
+        </div>
+        <div class="info-grid">
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Navegador</h3>
+            <div id="reqList"></div>
+          </div>
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Arquivos do jogo</h3>
+            <p class="card__text" style="margin-bottom:0">
+              Uma cópia legítima do <strong>Touhou 6 v1.02h</strong> (o patch
+              inglês <code>th06e</code> também serve). Este site não distribui
+              nenhum arquivo do jogo — ele precisa dos seus.
+            </p>
+            <div class="chip-row" style="margin-top:14px">
+              <span class="tag tag--scarlet">TL.DAT</span>
+              <span class="tag tag--scarlet">CM.DAT</span>
+              <span class="tag tag--scarlet">ST.DAT</span>
+              <span class="tag tag--scarlet">IN.DAT</span>
+              <span class="tag tag--scarlet">th06e_ST.DAT</span>
+              <span class="tag">bgm/*.wav</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Privacidade</h3>
+            <p class="card__text" style="margin-bottom:0">
+              O motor roda inteiro dentro do seu navegador. Os arquivos que
+              você seleciona são guardados no <strong>IndexedDB</strong> do
+              seu perfil — só no seu PC. Nenhum byte do jogo é enviado para
+              servidor nenhum, e o site não tem analytics nem cookies.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="section__title">Sobre este port <small>Rust + WebAssembly</small></h2>
+        </div>
+        <div class="info-grid">
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Motor</h3>
+            <p class="card__text" style="margin-bottom:0">
+              Reimplementação completa do motor do jogo: formatos PBG3, ANM,
+              ECL, STD e MSG, a VM de animações, o interpretador de ECL que
+              roda os padrões de tiro originais, o jogador com shot tiers,
+              hitbox e graze, e os seis estágios com seus chefes e
+              spellcards.
+            </p>
+          </div>
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Diferenças</h3>
+            <p class="card__text" style="margin-bottom:0">
+              <strong>60 Hz fixos</strong> — a lógica roda a passo fixo,
+              desacoplada do refresh do monitor. <strong>Sem sumiço</strong> —
+              o jogo original engasgava em 30/60 alternando. <strong>Pausa
+              funcional</strong> e <strong>crash report</strong> em vez de
+              sumir sem aviso.
+            </p>
+          </div>
+          <div class="panel">
+            <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Créditos</h3>
+            <p class="card__text" style="margin-bottom:0">
+              <strong>ZUN</strong> — pelo jogo.<br />
+              <strong>TheScreamer74/Touhou6</strong> — pelo motor em Rust.<br />
+              <strong>happyhavoc / GensokokyoClub th06</strong> — pela
+              decompilação de referência.
+            </p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:22px">
+          <strong>Direitos:</strong> projeto de fã, sem vínculo com a Team
+          Shanghai Alice. <em>Touhou Project</em> e <em>the Embodiment of
+          Scarlet Devil</em> são © ZUN / Team Shanghai Alice. O motor é MIT e
+          não contém nenhum arquivo do jogo.
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__bottom" style="border-top:0;padding-top:0">
+      <span>© <span id="year"></span> Portal dos Games · projeto de fã, não oficial.</span>
+      <span>Touhou Project © ZUN / Team Shanghai Alice.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="fsBtn" title="Tela cheia (F)">⛶ Tela cheia</button>
+
+<script src="assets/js/game.js"></script>
+<script>
+  (function () {
+    var y = document.getElementById("year");
+    if (y) y.textContent = String(new Date().getFullYear());
+  })();
+</script>
+</body>
+</html>
