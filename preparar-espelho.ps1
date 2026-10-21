@@ -71,7 +71,10 @@ if (-not (Test-Path $GameDir)) {
     throw "Pasta do jogo nao encontrada: $GameDir`nUse -GameDir <caminho>."
 }
 
-$required = @("TL.DAT", "CM.DAT", "ST.DAT", "IN.DAT", "th06e_ST.DAT")
+# O patch ingles (th06e_*) primeiro: e o mesmo jogo com o texto traduzido.
+# Os .DAT originais vao junto, como reserva.
+$required = @("th06e_TL.DAT", "th06e_CM.DAT", "th06e_ST.DAT", "th06e_IN.DAT",
+              "TL.DAT", "CM.DAT", "ST.DAT", "IN.DAT")
 $missing = $required | Where-Object { -not (Test-Path (Join-Path $GameDir $_)) }
 if ($missing) {
     throw "Faltam na pasta do jogo: $($missing -join ', ')`n`nO espelho precisa de TL.DAT, CM.DAT, ST.DAT, IN.DAT e th06e_ST.DAT."

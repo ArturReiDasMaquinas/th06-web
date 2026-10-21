@@ -20,17 +20,41 @@
     return new URL("pkg/th06.js", window.location.href).href;
   }
 
-  var REQUIRED = ["TL.DAT", "CM.DAT", "ST.DAT", "IN.DAT", "th06e_ST.DAT"];
+  /* Os arquivos obrigatorios. O patch ingles (th06e_*) e o preferido: e o
+   mesmo jogo com o texto traduzido, e os nomes dos arquivos dentro do
+   arquivo sao os mesmos. Uma pasta so com os .DAT originais tambem vale. */
+var REQUIRED = [
+  ["th06e_TL.DAT", "TL.DAT"],
+  ["th06e_CM.DAT", "CM.DAT"],
+  ["th06e_ST.DAT", "ST.DAT"],
+  ["th06e_IN.DAT", "IN.DAT"]
+];
+
+/* Quais grupos obrigatorios nao tem nenhum arquivo no mapa. */
+function missingRequired(map) {
+  var missing = [];
+  REQUIRED.forEach(function (group) {
+    var found = group.some(function (n) { return n in map; });
+    if (!found) missing.push(group[0]);
+  });
+  return missing;
+}
+
+/* O espelho tem os .DAT do patch ingles (e os originais, como reserva). */
+var DEFAULT_MIRROR_FILES = [
+  "th06e_TL.DAT", "th06e_CM.DAT", "th06e_ST.DAT", "th06e_IN.DAT",
+  "TL.DAT", "CM.DAT", "ST.DAT", "IN.DAT"
+].concat([
+  "bgm/th06_01.ogg", "bgm/th06_02.ogg", "bgm/th06_03.ogg",
+  "bgm/th06_04.ogg", "bgm/th06_05.ogg", "bgm/th06_06.ogg",
+  "bgm/th06_07.ogg", "bgm/th06_08.ogg", "bgm/th06_09.ogg",
+  "bgm/th06_10.ogg", "bgm/th06_11.ogg", "bgm/th06_12.ogg",
+  "bgm/th06_13.ogg", "bgm/th06_14.ogg", "bgm/th06_15.ogg",
+  "bgm/th06_16.ogg", "bgm/th06_17.ogg"
+  ]);
 
   /* Arquivos que o espelho deve expor (caminhos relativos à URL base). */
-  var DEFAULT_MIRROR_FILES = REQUIRED.concat([
-    "bgm/th06_01.wav", "bgm/th06_02.wav", "bgm/th06_03.wav",
-    "bgm/th06_04.wav", "bgm/th06_05.wav", "bgm/th06_06.wav",
-    "bgm/th06_07.wav", "bgm/th06_08.wav", "bgm/th06_09.wav",
-    "bgm/th06_10.wav", "bgm/th06_11.wav", "bgm/th06_12.wav",
-    "bgm/th06_13.wav", "bgm/th06_14.wav", "bgm/th06_15.wav",
-    "bgm/th06_16.wav", "bgm/th06_17.wav"
-  ]);
+  
 
   var CONFIG = {
     dataMirror: {
@@ -87,7 +111,8 @@
     var names = Object.keys(map).sort();
     var html = "";
     names.forEach(function (n) {
-      var missing = REQUIRED.indexOf(n) === -1 && !/\.wav$/.test(n) && n !== "__tag";
+      var known = REQUIRED.some(function (g) { return g.indexOf(n) !== -1; });
+      var missing = !known && !/\.wav$/.test(n) && !/\.ogg$/.test(n) && n !== "__tag";
       html += "<li" + (missing ? ' class="is-missing"' : "") + ">" +
               escapeHtml(n) + "</li>";
     });
@@ -215,7 +240,7 @@
           if (!out.__tag || out.__tag !== CACHE_TAG) { resolve(null); return; }
           delete out.__tag;
           /* só retoma com um conjunto completo */
-          if (REQUIRED.some(function (n) { return !(n in out); })) { resolve(null); return; }
+          if (missingRequired(out).length) { resolve(null); return; }
           resolve(out);
         };
         tx.onerror = function () { db.close(); resolve(null); };
@@ -299,7 +324,7 @@
         });
       });
     }, Promise.resolve()).then(function () {
-      var missing = REQUIRED.filter(function (n) { return !(n in map); });
+      var missing = missingRequired(map);
       if (missing.length) {
         throw new Error("Faltam os arquivos: " + missing.join(", ") +
                         ". Selecione a pasta do jogo (a que contém TL.DAT, CM.DAT, ST.DAT, IN.DAT e th06e_ST.DAT).");
@@ -360,7 +385,7 @@
           });
       });
     }, Promise.resolve()).then(function () {
-      var missing = REQUIRED.filter(function (n) { return !(n in map); });
+      var missing = missingRequired(map);
       if (missing.length) throw new Error("O espelho não tem os arquivos obrigatórios.");
       showFiles(map);
       setProgress(96, "Salvando…");
@@ -396,7 +421,7 @@
         var map = {};
         entries.forEach(function (bytes, path) { map[basename(path)] = bytes; });
 
-        var missing = REQUIRED.filter(function (n) { return !(n in map); });
+        var missing = missingRequired(map);
         if (missing.length) {
           throw new Error("O zip não tem: " + missing.join(", ") +
                           ". conferir o caminho da pasta dentro do zip.");

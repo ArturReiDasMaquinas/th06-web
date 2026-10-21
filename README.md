@@ -9,6 +9,8 @@ para WebAssembly — sem emulador, sem Flash, sem instalação.
 > Shanghai Alice. **Este repositório não distribui nenhum arquivo do jogo** —
 > ele precisa que você tenha os seus.
 
+O icone da pagina e o do proprio executavel do jogo (Reimu).
+
 ## Como funciona
 
 O site tem dois caminhos para jogar:
@@ -26,7 +28,11 @@ O site tem dois caminhos para jogar:
 Arquivos necessários (pasta do jogo):
 
 ```
-TL.DAT   CM.DAT   ST.DAT   IN.DAT   th06e_ST.DAT   bgm/th06_*.wav (ou .ogg)
+th06e_TL.DAT  th06e_CM.DAT  th06e_ST.DAT  th06e_IN.DAT   bgm/th06_*.wav (ou .ogg)
+
+Ou, se voce so tem o jogo original em japones, os arquivos sem o prefixo
+`th06e_` (TL.DAT, CM.DAT, ST.DAT, IN.DAT) tambem funcionam - o site prefere
+o patch ingles, que e o mesmo jogo com o texto traduzido.
 ```
 
 `bgm/` é opcional — sem ele o jogo roda em silêncio.

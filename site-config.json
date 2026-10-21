@@ -29,28 +29,14 @@
     "$comment_files": "Os caminhos sao relativos. O 'bgm/' e opcional — sem ele o jogo roda em silencio. O BGM esta em Ogg Vorbis (37 MB em vez de 310 MB de WAV): o motor decodifica Ogg/MP3 pelo decoder nativo do navegador. No modo zip, o caminho e casado pelo FIM do nome dentro do zip (entao serve tanto 'TL.DAT' quanto 'bgm/th06_01.ogg', com ou sem a pasta da frente).",
 
     "files": [
-      "TL.DAT",
-      "CM.DAT",
-      "ST.DAT",
-      "IN.DAT",
-      "th06e_ST.DAT",
-      "bgm/th06_01.ogg",
-      "bgm/th06_02.ogg",
-      "bgm/th06_03.ogg",
-      "bgm/th06_04.ogg",
-      "bgm/th06_05.ogg",
-      "bgm/th06_06.ogg",
-      "bgm/th06_07.ogg",
-      "bgm/th06_08.ogg",
-      "bgm/th06_09.ogg",
-      "bgm/th06_10.ogg",
-      "bgm/th06_11.ogg",
-      "bgm/th06_12.ogg",
-      "bgm/th06_13.ogg",
-      "bgm/th06_14.ogg",
-      "bgm/th06_15.ogg",
-      "bgm/th06_16.ogg",
-      "bgm/th06_17.ogg"
+    "th06e_TL.DAT",
+    "th06e_CM.DAT",
+    "th06e_ST.DAT",
+    "th06e_IN.DAT",
+    "TL.DAT",
+    "CM.DAT",
+    "ST.DAT",
+    "IN.DAT",
     ]
   }
 }
