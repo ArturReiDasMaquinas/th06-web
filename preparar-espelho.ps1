@@ -44,7 +44,15 @@ param(
     # So os 5 .DAT (8,7 MB), sem a pasta bgm/ (300 MB).
     # O jogo roda sem musica — o visitante pode mandar a propria pasta
     # se quiser o audio completo.
-    [switch]$SemBgm
+    [switch]$SemBgm,
+
+    # Converte o BGM para Ogg Vorbis (o que o GitHub aceita de boa):
+    # 310 MB de WAV -> 37 MB de Ogg, mesma duracao e qualidade
+    # perceptual. O motor do site decodifica Ogg pelo decoder do browser.
+    [switch]$Ogg,
+
+    # Caminho do ffmpeg (pra converter o BGM).
+    [string]$Ffmpeg = "E:\ffmpeg\bin\ffmpeg.exe"
 )
 
 $ErrorActionPreference = "Stop"
@@ -105,15 +113,27 @@ foreach ($f in $required) {
 if ($wavs.Count -gt 0) {
     New-Item -ItemType Directory -Force -Path (Join-Path $out "bgm") | Out-Null
     foreach ($w in $wavs) {
-        Copy-Item $w.FullName (Join-Path $out "bgm\$($w.Name)") -Force
-        Write-Host "  copiado bgm\$($w.Name)"
+        if ($Ogg) {
+            # NOTA: em PowerShell o nome da variavel nao diferencia
+            # maiusculas, entao $ogg seria o mesmo que o switch $Ogg.
+            $oggPath = Join-Path $out "bgm\$($w.BaseName).ogg"
+            & $Ffmpeg -hide_banner -loglevel error -y -i $w.FullName -c:a libvorbis -q:a 5 $oggPath
+            if ($LASTEXITCODE -ne 0) { throw "ffmpeg falhou em $($w.Name)" }
+            Write-Host "  convertido bgm\$($w.BaseName).ogg"
+        } else {
+            Copy-Item $w.FullName (Join-Path $out "bgm\$($w.Name)") -Force
+            Write-Host "  copiado bgm\$($w.Name)"
+        }
     }
 }
 
 # Pagina de teste: se o espelho estiver no ar, TL.DAT deve baixar em vez de
 # mostrar o HTML de listagem do GitHub.
 $liDat = ($required | ForEach-Object { '  <li><a href="{0}">{0}</a></li>' -f $_ }) -join "`n"
-$liBgm = ($wavs   | ForEach-Object { '  <li><a href="bgm/{0}">bgm/{0}</a> ({1} MB)</li>' -f $_.Name, ([math]::Round($_.Length / 1MB, 1)) }) -join "`n"
+$liBgm = ($wavs   | ForEach-Object {
+    $ext = if ($Ogg) { "ogg" } else { "wav" }
+    '  <li><a href="bgm/{0}.{1}">bgm/{0}.{1}</a> ({2} MB)</li>' -f $_.BaseName, $ext, ([math]::Round($_.Length / 1MB, 1))
+}) -join "`n"
 
 $page = @"
 <!DOCTYPE html>

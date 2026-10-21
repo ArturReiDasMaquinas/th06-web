@@ -18,16 +18,29 @@ O site tem dois caminhos para jogar:
    servidor nenhum. Os arquivos ficam em cache no IndexedDB do seu perfil,
    então a próxima visita é só um clique.
 2. **Carregar do espelho.** Busca os arquivos de uma URL configurada em
-   `site-config.json` (mesma origem ou outra, desde que mande
-   `Access-Control-Allow-Origin`).
+   `site-config.json`. No padrão, o espelho é o repo
+   <https://github.com/ArturReiDasMaquinas/th06-data>, servido em
+   `arturreidasmaquinas.github.io/th06-data` — **mesma origem** do site,
+   então nem existe CORS.
 
 Arquivos necessários (pasta do jogo):
 
 ```
-TL.DAT   CM.DAT   ST.DAT   IN.DAT   th06e_ST.DAT   bgm/th06_01.wav ... bgm/th06_17.wav
+TL.DAT   CM.DAT   ST.DAT   IN.DAT   th06e_ST.DAT   bgm/th06_*.wav (ou .ogg)
 ```
 
 `bgm/` é opcional — sem ele o jogo roda em silêncio.
+
+### O BGM em Ogg
+
+O BGM original são 17 WAVs PCM de 44,1 kHz (310 MB, 10–32 MB cada) — acima
+do limite de 25 MB da upload do GitHub pelo navegador. No espelho ele está
+em **Ogg Vorbis**: 37,7 MB no total, 1,1–3,6 MB por faixa, mesma duração e
+qualidade perceptual (rms 0,1079 contra 0,1125 do WAV original).
+
+O motor aceita os dois formatos: PCM é lido pelo parser dele mesmo, e o
+comprimido vai pro `decodeAudioData` do navegador, que já tem decoder
+Vorbis — nenhum decoder novo dentro do wasm.
 
 ## Rodar localmente
 
@@ -120,17 +133,16 @@ site que o GitHub Pages serve.
 
 ## Publicar no GitHub Pages
 
+Este repo é o site: <https://arturreidasmaquinas.github.io/th06-web/>
+
+O workflow `.github/workflows/pages.yml` faz o deploy sozinho a cada push
+no `main` (com `enablement: true`, ele liga o Pages no repo sem precisar
+ir em Settings → Pages na mão).
+
 ```sh
-git init
-git add .
-git commit -m "Touhou 6 em WebAssembly"
-git branch -M main
-git remote add origin https://github.com/<usuario>/TH06-web.git
+git remote add origin https://github.com/ArturReiDasMaquinas/th06-web.git
 git push -u origin main
 ```
-
-Depois: **Settings → Pages → Deploy from a branch → `main` / `/ (root)`**.
-O site sai em `https://<usuario>.github.io/TH06-web/`.
 
 O `.nojekyll` já está na raiz. O GitHub Pages serve `.wasm` como
 `application/wasm` e `.js` como `text/javascript` — não precisa de nada
@@ -171,11 +183,15 @@ com token, por exemplo) — o link compartilhado não dá.
 ### Gerar o espelho
 
 ```powershell
-.\preparar-espelho.ps1
+.\preparar-espelho.ps1 -Ogg
 ```
 
-Cria a pasta `th06-data` com os arquivos do jogo na estrutura certa, faz o
-commit inicial e imprime o passo a passo do push e do Pages.
+Cria a pasta `th06-data` com os arquivos do jogo na estrutura certa, converte
+o BGM para Ogg (precisa do `ffmpeg`, que vem no `E:\ffmpeg\bin` nesta
+máquina), faz o commit inicial e imprime o passo a passo do push.
+
+Sem `-Ogg` copia os WAV como estão (310 MB — o GitHub aceita por `git
+push`, mas a upload pelo navegador não, e o clone fica pesado).
 
 ### Usar o Dropbox como espelho
 
