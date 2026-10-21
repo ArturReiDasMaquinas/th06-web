@@ -83,17 +83,13 @@ if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
 
 Push-Location $engine
 try {
-    & $wasmPack build crates/game --release --target web --out-dir ..\pkg --out-name th06
+    # --out-dir PRECISA ser absoluto: o wasm-pack resolve um caminho relativo
+    # a partir do crate (crates/game), e a saida acabaria em crates/pkg.
+    & $wasmPack build crates/game --release --target web --out-dir $outDir --out-name th06
     if ($LASTEXITCODE -ne 0) { throw "wasm-pack falhou (exit $LASTEXITCODE)" }
 }
 finally {
     Pop-Location
-}
-
-# O wasm-pack resolve --out-dir a partir do crate, não do workspace.
-$generated = Join-Path $engine "crates\pkg"
-if (Test-Path $generated) {
-    Remove-Item $generated -Recurse -Force
 }
 
 # Limpa o que não é preciso no repositório.
@@ -101,6 +97,7 @@ Get-ChildItem $outDir -Filter "package.json" -ErrorAction SilentlyContinue | Rem
 Get-ChildItem $outDir -Filter ".gitignore"   -ErrorAction SilentlyContinue | Remove-Item -Force
 
 $wasm = Get-ChildItem $outDir -Filter "*.wasm" | Select-Object -First 1
+if (-not $wasm) { throw "o build terminou mas nao gerou nenhum .wasm em $outDir" }
 Write-Host ""
 Write-Host "==> pronto: $($wasm.FullName) ($([math]::Round($wasm.Length / 1MB, 2)) MB)"
-Write-Host "==> teste local:  cd '$root';  python -m http.server 8080"
+Write-Host "==> teste local:  cd '$root';  python serve.py"
