@@ -50,8 +50,20 @@ http://127.0.0.1:8080/?mirror=http://127.0.0.1:8081
 
 ## Recompilar o WASM
 
+O código-fonte Rust do motor **não fica neste repositório** — ele mora na
+pasta vizinha `touhou6-engine/` (ou em qualquer lugar que você indicar):
+
 ```powershell
 .\build-wasm.ps1
+.\build-wasm.ps1 -EnginePath "C:\caminho\para\touhou6-engine"
+```
+
+O script procura o motor em `./engine` e em `../touhou6-engine`, compila e
+escreve o resultado em `pkg/`:
+
+```
+pkg/th06.js          glue do wasm-bindgen
+pkg/th06_bg.wasm     o motor (~9 MB)
 ```
 
 Precisa de Rust stable com o target `wasm32-unknown-unknown` e do `wasm-pack`:
@@ -67,12 +79,8 @@ Sem o Visual Studio Build Tools, aponte o linker para o GCC do MSYS2:
 $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
 ```
 
-O script compila `engine/` e escreve o resultado em `pkg/`:
-
-```
-pkg/th06.js          glue do wasm-bindgen
-pkg/th06_bg.wasm     o motor (~9 MB)
-```
+O fonte original também está no GitHub, em
+[TheScreamer74/Touhou6](https://github.com/TheScreamer74/Touhou6) (MIT).
 
 ## Estrutura
 
@@ -81,17 +89,20 @@ TH06-web/
 ├── index.html              a página do jogo
 ├── site-config.json        espelho dos arquivos + link do portal
 ├── pkg/                    saída do wasm-pack (versionada)
+│   ├── th06.js            glue do wasm-bindgen
+│   └── th06_bg.wasm       o motor (~9 MB)
 ├── assets/
 │   ├── css/style.css       tema (idêntico ao do Portal dos Games)
 │   ├── css/game.css        estilos da página do jogo
 │   └── js/game.js          upload, espelho, cache IndexedDB, fullscreen
-├── engine/                 código-fonte Rust do motor
-│   ├── crates/formats/     PBG3, ANM, ECL, STD, MSG
-│   ├── crates/engine/      renderizador wgpu, loop fixo, input, áudio
-│   └── crates/game/        VM de ANM/ECL, menus, estágios, cena
 ├── serve.py                servidor local com os MIME types certos
-└── build-wasm.ps1          rebuild do pkg/
+├── build-wasm.ps1          rebuild do pkg/
+├── .nojekyll
+└── README.md
 ```
+
+O motor em Rust fica fora, em `../touhou6-engine/` — este repositório é só o
+site que o GitHub Pages serve.
 
 ## Publicar no GitHub Pages
 
@@ -148,7 +159,7 @@ domínio — nesse caso o servidor precisa mandar
 
 ## Licença
 
-- O código do motor (`engine/`) é MIT, de
+- O código do motor é MIT, de
   [TheScreamer74/Touhou6](https://github.com/TheScreamer74/Touhou6).
 - O site e o tema são MIT.
 - Os arquivos do jogo **não** estão aqui e continuam sendo de ZUN / Team

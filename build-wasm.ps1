@@ -18,12 +18,31 @@
 [CmdletBinding()]
 param(
     # "nightly" ou "stable"
-    [string]$Profile = "release"
+    [string]$Profile = "release",
+
+    # Onde esta o codigo-fonte Rust do motor. Por padrao, procura nesta
+    # pasta (./engine) e na pasta vizinha (../touhou6-engine).
+    [string]$EnginePath
 )
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$engine = Join-Path $root "engine"
+
+# --- onde esta o motor ------------------------------------------------------
+
+if (-not $EnginePath) {
+    $candidates = @(
+        (Join-Path $root "engine"),
+        (Join-Path (Split-Path -Parent $root) "touhou6-engine")
+    )
+    $found = $candidates | Where-Object { Test-Path (Join-Path $_ "crates\game\Cargo.toml") } | Select-Object -First 1
+    if (-not $found) {
+        throw "Codigo do motor nao encontrado. Esperado em:`n  $($candidates -join "`n  ")`nUse -EnginePath <caminho>."
+    }
+    $EnginePath = $found
+}
+$engine = $EnginePath
+Write-Host "==> motor em: $engine"
 
 # --- toolchain -------------------------------------------------------------
 
