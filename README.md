@@ -48,23 +48,40 @@ parâmetro `?mirror`:
 http://127.0.0.1:8080/?mirror=http://127.0.0.1:8081
 ```
 
-## Recompilar o WASM
+## Onde está o motor (e o que fazer com a pasta `engine`)
 
-O código-fonte Rust do motor **não fica neste repositório** — ele mora na
-pasta vizinha `touhou6-engine/` (ou em qualquer lugar que você indicar):
+O **código-fonte Rust do motor não está neste repositório** — ele fica na
+pasta vizinha `touhou6-engine/` (5 MB), e o `.wasm` já compilado está em
+`pkg/` (versionado aqui, é o que o Pages serve).
+
+Você **não precisa** da pasta do motor para publicar o site. Ela só é útil
+se você for mexer no motor.
+
+```
+Default Project\
+├── PortalDosGames\     repo do portal
+├── TH06-web\           repo do site  <- este
+└── touhou6-engine\     fonte Rust do motor (fora do repo, 5 MB)
+```
+
+Para recompilar:
 
 ```powershell
 .\build-wasm.ps1
-.\build-wasm.ps1 -EnginePath "C:\caminho\para\touhou6-engine"
 ```
 
-O script procura o motor em `./engine` e em `../touhou6-engine`, compila e
-escreve o resultado em `pkg/`:
+O script acha o motor sozinho em `./engine` ou `../touhou6-engine` (ou por
+`-EnginePath`). Recompilar leva **~1m45s** do zero; com o cache de build
+(`target/`, 600 MB) leva ~20s.
 
-```
-pkg/th06.js          glue do wasm-bindgen
-pkg/th06_bg.wasm     o motor (~9 MB)
-```
+**Três opções pra pasta do motor:** deixar aí (5 MB), apagar (dá pra
+re-baixar do upstream quando precisar) ou virar um repo próprio no GitHub.
+O `target/` é cache de build e pode ser apagado à vontade — é regenerável.
+
+O fonte original também está no GitHub, em
+[TheScreamer74/Touhou6](https://github.com/TheScreamer74/Touhou6) (MIT).
+
+### Toolchain para recompilar
 
 Precisa de Rust stable com o target `wasm32-unknown-unknown` e do `wasm-pack`:
 
@@ -78,9 +95,6 @@ Sem o Visual Studio Build Tools, aponte o linker para o GCC do MSYS2:
 ```powershell
 $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
 ```
-
-O fonte original também está no GitHub, em
-[TheScreamer74/Touhou6](https://github.com/TheScreamer74/Touhou6) (MIT).
 
 ## Estrutura
 
