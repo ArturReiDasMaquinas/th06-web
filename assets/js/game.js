@@ -110,6 +110,13 @@
 
   /* -------------------------------------------------------------- config */
 
+  /* Editar JSON no Bloco de Notas / VS Code no Windows pode gravar um BOM
+     UTF-8, que Response.json() não aceita. Tiramos o BOM antes do parse. */
+  function parseJson(text) {
+    if (text && text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    return JSON.parse(text);
+  }
+
   function loadConfig() {
     /* Override de espelho pela URL: index.html?mirror=https://exemplo.com
        Útil para testar sem editar o site-config.json. Tem prioridade
@@ -119,9 +126,10 @@
 
     if (!window.fetch) return Promise.resolve();
     return fetch("site-config.json", { cache: "no-cache" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (cfg) {
-        if (!cfg) return;
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (txt) {
+        if (!txt) return;
+        var cfg = parseJson(txt);
         if (cfg.dataMirror) {
           CONFIG.dataMirror.enabled = cfg.dataMirror.enabled !== false;
           if (cfg.dataMirror.url && !override) {
@@ -327,8 +335,14 @@
       var missing = REQUIRED.filter(function (n) { return !(n in map); });
       if (missing.length) throw new Error("O espelho não tem os arquivos obrigatórios.");
       showFiles(map);
-      setProgress(100, "Pronto");
-      return map;
+      setProgress(96, "Salvando…");
+      /* Guarda localmente também: na próxima visita é só "Continuar". */
+      return idbSave(map)
+        .catch(function () { /* cota cheia: seguimos sem cache */ })
+        .then(function () {
+          setProgress(100, "Pronto");
+          return map;
+        });
     });
   }
 
@@ -419,11 +433,17 @@
     /* botão "carregar do espelho" */
     if (el.hostBtn) {
       el.hostBtn.addEventListener("click", function () {
+        if (!CONFIG.dataMirror.url) {
+          setStatus("Nenhum espelho configurado. Edite dataMirror.url em site-config.json, ou use “Selecionar pasta do jogo”.", "error");
+          return;
+        }
         loadFromMirror()
           .then(function (map) { if (map) return startGame(map); })
           .catch(function (err) {
             console.error(err);
-            setStatus("Falha ao baixar do espelho: " + (err.message || err), "error");
+            setStatus("Não consegui baixar do espelho (" + CONFIG.dataMirror.url + "): " +
+                      (err.message || err) +
+                      " — se o espelho não existir, use “Selecionar pasta do jogo”.", "error");
             hideProgress();
             busy(false);
           });
