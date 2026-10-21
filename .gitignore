@@ -7,6 +7,10 @@ node_modules/
 # Log do servidor local
 serve.log
 
+# Pasta do espelho: os arquivos do jogo são © ZUN / Team Shanghai Alice e
+# somam ~300 MB. NÃO versione essa pasta.
+data/
+
 # Sistema
 Thumbs.db
 .DS_Store
