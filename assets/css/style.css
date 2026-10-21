@@ -511,9 +511,9 @@ main { padding-bottom: 84px; }
   border: 1px solid var(--border);
 }
 
-.linkrow__body { flex: 1; min-width: 0; }
-.linkrow__title { font-weight: 600; margin: 0; font-size: 0.98rem; }
-.linkrow__desc { margin: 2px 0 0; color: var(--faint); font-size: 0.85rem; }
+.linkrow__body { flex: 1; min-width: 0; display: block; }
+.linkrow__title { font-weight: 600; margin: 0; font-size: 0.98rem; display: block; }
+.linkrow__desc { margin: 2px 0 0; color: var(--faint); font-size: 0.85rem; display: block; }
 
 .linkrow__go { color: var(--faint); font-size: 1.15rem; flex: none; }
 .linkrow:hover .linkrow__go { color: var(--gold); }
