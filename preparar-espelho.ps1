@@ -48,7 +48,8 @@ param(
 
     # Converte o BGM para Ogg Vorbis (o que o GitHub aceita de boa):
     # 310 MB de WAV -> 37 MB de Ogg, mesma duracao e qualidade
-    # perceptual. O motor do site decodifica Ogg pelo decoder do browser.
+    # perceptual. O motor do site decodifica o Ogg dentro do wasm, com o
+    # stb_vorbis (o mesmo codigo do APK Android).
     [switch]$Ogg,
 
     # Caminho do ffmpeg (pra converter o BGM).

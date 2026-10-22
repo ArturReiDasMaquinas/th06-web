@@ -1,15 +1,17 @@
 ﻿<#
 .SYNOPSIS
-    Recompila o motor do Touhou 6 para WebAssembly e atualiza ./pkg.
+    Recompila o motor do Touhou 6 (C++) para WebAssembly e atualiza ./pkg.
 
 .DESCRIPTION
+    O motor nao e mais o de Rust: e o branch `portable` do
+    GensokyoClub/th06 (o mesmo do APK Android), compilado com o
+    Emscripten. O codigo-fonte fica fora deste repositorio, em
+    D:\ProjetosGames\th06-web (ou onde o -EnginePath apontar).
+
     Precisa de:
-      - Rust stable com o target wasm32-unknown-unknown
-        rustup target add wasm32-unknown-unknown
-      - wasm-pack
-        cargo install wasm-pack    (ou baixe o binário de rustwasm/wasm-pack)
-      - um linker para o host. Sem o Visual Studio Build Tools, use o GCC do
-        MSYS2:  $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
+      - Emscripten (https://emscripten.org)  -> $env:EMSDK_PATH
+      - o SDL2 compilado para wasm (o build-wasm.cmd do motor compila)
+      - cmake e ninja (o do Android SDK serve)
 
 .EXAMPLE
     .\build-wasm.ps1
@@ -17,87 +19,37 @@
 
 [CmdletBinding()]
 param(
-    # "nightly" ou "stable"
-    [string]$Profile = "release",
-
-    # Onde esta o codigo-fonte Rust do motor. Por padrao, procura nesta
-    # pasta (./engine) e na pasta vizinha (../touhou6-engine).
-    [string]$EnginePath
+    # Onde esta o codigo-fonte C++ do motor.
+    [string]$EnginePath = "D:\ProjetosGames\th06-web"
 )
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# --- onde esta o motor ------------------------------------------------------
-
-if (-not $EnginePath) {
-    $candidates = @(
-        (Join-Path $root "engine"),
-        (Join-Path (Split-Path -Parent $root) "touhou6-engine")
-    )
-    $found = $candidates | Where-Object { Test-Path (Join-Path $_ "crates\game\Cargo.toml") } | Select-Object -First 1
-    if (-not $found) {
-        throw "Codigo do motor nao encontrado. Esperado em:`n  $($candidates -join "`n  ")`nUse -EnginePath <caminho>."
-    }
-    $EnginePath = $found
-}
-$engine = $EnginePath
-Write-Host "==> motor em: $engine"
-
-# --- toolchain -------------------------------------------------------------
-
-$cargoBin = Join-Path $env:USERPROFILE ".cargo\bin"
-if (Test-Path $cargoBin) { $env:PATH = "$cargoBin;$env:PATH" }
-
-# Linker do host: MSYS2 (mingw64) ou o GCC que estiver no PATH.
-$msysGcc = "C:\msys64\mingw64\bin"
-if (Test-Path $msysGcc) { $env:PATH = "$msysGcc;$env:PATH" }
-
-if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-    throw "cargo não encontrado. Instale o Rust: https://rustup.rs"
+if (-not (Test-Path (Join-Path $EnginePath "CMakeLists.txt"))) {
+    throw "Motor C++ nao encontrado em: $EnginePath (esperado o CMakeLists.txt)"
 }
 
-# wasm-pack: procura no PATH, depois nas pastas usuais.
-$wasmPack = Get-Command wasm-pack -ErrorAction SilentlyContinue
-if (-not $wasmPack) {
-    $candidates = @(
-        "$env:USERPROFILE\.cargo\bin\wasm-pack.exe",
-        "C:\Program Files\wasm-pack\wasm-pack.exe",
-        "$env:LOCALAPPDATA\Temp\opencode\rustsetup\wasm-pack\wasm-pack-v0.13.1-x86_64-pc-windows-msvc\wasm-pack.exe"
-    )
-    $found = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if ($found) { $wasmPack = $found } else {
-        throw "wasm-pack não encontrado. Instale com: cargo install wasm-pack"
-    }
+$script = Join-Path $EnginePath "build-wasm.cmd"
+if (-not (Test-Path $script)) {
+    throw "Script de build nao encontrado: $script"
 }
 
-Write-Host "==> rustc      : $(& rustc --version)"
-Write-Host "==> cargo      : $(& cargo --version)"
-Write-Host "==> wasm-pack  : $wasmPack"
-Write-Host "==> target     : wasm32-unknown-unknown"
+Write-Host "==> motor em: $EnginePath"
+Write-Host "==> compilando (SDL2 + jogo)"
 
-# --- build -----------------------------------------------------------------
+& cmd /c $script
+if ($LASTEXITCODE -ne 0) { throw "o build do motor falhou (exit $LASTEXITCODE)" }
 
+# O motor gera pkg\th06.js e pkg\th06.wasm; o site usa o nome com o
+# sufixo _bg (o do wasm-pack, de quando o motor era em Rust).
 $outDir = Join-Path $root "pkg"
-if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
+if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir | Out-Null }
 
-Push-Location $engine
-try {
-    # --out-dir PRECISA ser absoluto: o wasm-pack resolve um caminho relativo
-    # a partir do crate (crates/game), e a saida acabaria em crates/pkg.
-    & $wasmPack build crates/game --release --target web --out-dir $outDir --out-name th06
-    if ($LASTEXITCODE -ne 0) { throw "wasm-pack falhou (exit $LASTEXITCODE)" }
-}
-finally {
-    Pop-Location
-}
+Copy-Item (Join-Path $EnginePath "pkg\th06.js")     (Join-Path $outDir "th06.js")     -Force
+Copy-Item (Join-Path $EnginePath "pkg\th06.wasm")   (Join-Path $outDir "th06_bg.wasm") -Force
 
-# Limpa o que não é preciso no repositório.
-Get-ChildItem $outDir -Filter "package.json" -ErrorAction SilentlyContinue | Remove-Item -Force
-Get-ChildItem $outDir -Filter ".gitignore"   -ErrorAction SilentlyContinue | Remove-Item -Force
-
-$wasm = Get-ChildItem $outDir -Filter "*.wasm" | Select-Object -First 1
-if (-not $wasm) { throw "o build terminou mas nao gerou nenhum .wasm em $outDir" }
+$wasm = Get-Item (Join-Path $outDir "th06_bg.wasm")
 Write-Host ""
 Write-Host "==> pronto: $($wasm.FullName) ($([math]::Round($wasm.Length / 1MB, 2)) MB)"
 Write-Host "==> teste local:  cd '$root';  python serve.py"

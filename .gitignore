@@ -14,6 +14,10 @@ data/
 # O espelho de teste local (os .DAT e o BGM do jogo, ~53 MB).
 mirror-test/
 
+# Restos do wasm-pack (o motor era em Rust; agora e o glue do Emscripten).
+pkg/*.d.ts
+pkg/package.json
+
 # Sistema
 Thumbs.db
 .DS_Store
