@@ -135,12 +135,26 @@ var DEFAULT_MIRROR_FILES = [
     }
   }
 
+  /* O foco tem de ficar no canvas: e ele que recebe as teclas do
+     jogo. Clicar num botao da pagina nao pode roubar o foco (e as
+     setas nao podem rolar a pagina). */
+  function keepFocusOnGame(e) {
+    if (e) {
+      e.preventDefault();
+    }
+    var canvas = document.getElementById("canvas");
+    if (canvas && document.body.classList.contains("playing")) {
+      canvas.focus();
+    }
+  }
+
   function toggleTouchMode() {
     touchEnabled = !touchEnabled;
     try {
       localStorage.setItem(TOUCH_KEY, touchEnabled ? "on" : "off");
     } catch (e) { /* sem localStorage */ }
     applyTouchMode();
+    keepFocusOnGame();
   }
 
   /* ---------------------------------------------------------------- utils */
@@ -414,7 +428,12 @@ var DEFAULT_MIRROR_FILES = [
       .then(function () {
         document.body.classList.add("playing");
         canvas.addEventListener("dblclick", toggleFullscreen);
+        /* O menu de contexto do navegador roubaria o foco (e o
+           teclado) no meio da partida. */
+        canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+        /* O foco fica no canvas: e ele que recebe as teclas do jogo. */
         canvas.focus();
+        try { window.focus(); } catch (e) { /* o navegador nao deixa */ }
         /* O botao do modo touch continua na tela durante o jogo, para
            poder ligar e desligar os controles na hora. */
         if (el.touchFloatBtn) el.touchFloatBtn.hidden = false;
@@ -600,9 +619,15 @@ var DEFAULT_MIRROR_FILES = [
     applyTouchMode();
 
     /* Os botoes do modo touch (o do launcher e o que fica por cima do
-       jogo). */
-    if (el.touchBtn) el.touchBtn.addEventListener("click", toggleTouchMode);
-    if (el.touchFloatBtn) el.touchFloatBtn.addEventListener("click", toggleTouchMode);
+       jogo). O mousedown e cancelado para o foco ficar no canvas. */
+    if (el.touchBtn) {
+      el.touchBtn.addEventListener("mousedown", keepFocusOnGame);
+      el.touchBtn.addEventListener("click", toggleTouchMode);
+    }
+    if (el.touchFloatBtn) {
+      el.touchFloatBtn.addEventListener("mousedown", keepFocusOnGame);
+      el.touchFloatBtn.addEventListener("click", toggleTouchMode);
+    }
 
     /* Teste automatico: ?autotest=1 carrega do espelho e comeca o jogo,
        sem precisar de clicar. */
@@ -687,10 +712,26 @@ var DEFAULT_MIRROR_FILES = [
     /* fullscreen */
     if (el.fsBtn) el.fsBtn.addEventListener("click", toggleFullscreen);
     window.addEventListener("keydown", function (e) {
-      if (document.body.classList.contains("playing") && (e.key === "f" || e.key === "F")) {
-        e.preventDefault();
-        toggleFullscreen();
+      if (document.body.classList.contains("playing")) {
+        if (e.key === "f" || e.key === "F") {
+          e.preventDefault();
+          toggleFullscreen();
+          return;
+        }
+        /* As setas e o espaco sao do jogo: nao podem rolar a pagina. */
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "Space"].indexOf(e.key) !== -1) {
+          e.preventDefault();
+        }
       }
+    }, true);
+
+    /* Um clique fora do canvas (no fundo da pagina) devolve o foco
+       para o jogo, sem roubar o teclado de quem clicou num botao. */
+    document.addEventListener("mousedown", function (e) {
+      if (!document.body.classList.contains("playing")) return;
+      var t = e.target;
+      if (t && (t.tagName === "BUTTON" || t.id === "canvas")) return;
+      keepFocusOnGame(e);
     }, true);
 
     /* cache salvo: mostra o botão de continuar */

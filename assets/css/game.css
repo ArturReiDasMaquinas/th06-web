@@ -262,25 +262,28 @@ body.playing #fsBtn { display: none; }
   touch-action: none;
 }
 
-/* O botao do modo touch, que fica por cima do jogo. */
+/* O botao do modo touch, que fica por cima do jogo. Fica no meio do
+   topo: nos cantos moram os botoes virtuais do jogo (o ENTER em cima
+   a esquerda e o ESC em cima a direita). */
 .touch-float {
   position: fixed;
-  top: 10px;
-  left: 12px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
-  opacity: 0.55;
+  opacity: 0.3;
   background: var(--surface);
   color: #fff;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  padding: 0.35rem 0.8rem;
+  padding: 0.25rem 0.6rem;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   cursor: pointer;
   transition: opacity .15s ease, border-color .15s ease;
 }
 .touch-float:hover { opacity: 1; }
-.touch-float.is-on { border-color: var(--gold); color: var(--gold); opacity: 0.9; }
+.touch-float.is-on { border-color: var(--gold); color: var(--gold); opacity: 0.55; }
 
 /* O botao do modo touch no launcher. */
 .btn--touch {
