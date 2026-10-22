@@ -11,6 +11,9 @@ serve.log
 # somam ~300 MB. NÃO versione essa pasta.
 data/
 
+# O espelho de teste local (os .DAT e o BGM do jogo, ~53 MB).
+mirror-test/
+
 # Sistema
 Thumbs.db
 .DS_Store

@@ -33,10 +33,29 @@
     "th06e_CM.DAT",
     "th06e_ST.DAT",
     "th06e_IN.DAT",
+    "th06e_MD.DAT",
+    "th06e_ED.DAT",
     "TL.DAT",
     "CM.DAT",
     "ST.DAT",
-    "IN.DAT"
+    "IN.DAT",
+    "bgm/th06_01.ogg",
+    "bgm/th06_02.ogg",
+    "bgm/th06_03.ogg",
+    "bgm/th06_04.ogg",
+    "bgm/th06_05.ogg",
+    "bgm/th06_06.ogg",
+    "bgm/th06_07.ogg",
+    "bgm/th06_08.ogg",
+    "bgm/th06_09.ogg",
+    "bgm/th06_10.ogg",
+    "bgm/th06_11.ogg",
+    "bgm/th06_12.ogg",
+    "bgm/th06_13.ogg",
+    "bgm/th06_14.ogg",
+    "bgm/th06_15.ogg",
+    "bgm/th06_16.ogg",
+    "bgm/th06_17.ogg"
     ]
   }
 }

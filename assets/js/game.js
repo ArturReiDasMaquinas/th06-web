@@ -84,8 +84,64 @@ var DEFAULT_MIRROR_FILES = [
     status: $("status"),
     fileList: $("fileList"),
     fsBtn: $("fsBtn"),
-    reqList: $("reqList")
+    reqList: $("reqList"),
+    touchBtn: $("touchBtn"),
+    touchFloatBtn: $("touchBtnFloat")
   };
+
+  /* --------------------------------------------------------- modo touch */
+
+  /* Os controles na tela (os botoes virtuais nas tarjas pretas) sao uteis
+     no celular, mas no PC so atrapalham o teclado. O botao liga e desliga
+     eles, e a escolha fica guardada no navegador. */
+  var TOUCH_KEY = "th06-touch-mode";
+
+  function defaultTouchMode() {
+    try {
+      if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) {
+        return true;
+      }
+    } catch (e) { /* sem matchMedia: cai no teste da largura */ }
+    return window.innerWidth < 900;
+  }
+
+  var touchEnabled = (function () {
+    try {
+      var saved = localStorage.getItem(TOUCH_KEY);
+      if (saved === "on") return true;
+      if (saved === "off") return false;
+    } catch (e) { /* sem localStorage */ }
+    return defaultTouchMode();
+  })();
+
+  /* Liga/desliga os controles na tela, no motor e no botao. */
+  function applyTouchMode() {
+    var label = touchEnabled ? "ligado" : "desligado";
+
+    if (el.touchBtn) {
+      el.touchBtn.textContent = "📱 Modo touch: " + label;
+      el.touchBtn.setAttribute("aria-pressed", touchEnabled ? "true" : "false");
+      el.touchBtn.classList.toggle("is-on", touchEnabled);
+    }
+    if (el.touchFloatBtn) {
+      el.touchFloatBtn.textContent = touchEnabled ? "📱 TOUCH: on" : "📱 TOUCH: off";
+      el.touchFloatBtn.setAttribute("aria-pressed", touchEnabled ? "true" : "false");
+      el.touchFloatBtn.classList.toggle("is-on", touchEnabled);
+    }
+
+    var mod = window.__th06Module;
+    if (mod && typeof mod._th06_set_touch === "function") {
+      mod._th06_set_touch(touchEnabled ? 1 : 0);
+    }
+  }
+
+  function toggleTouchMode() {
+    touchEnabled = !touchEnabled;
+    try {
+      localStorage.setItem(TOUCH_KEY, touchEnabled ? "on" : "off");
+    } catch (e) { /* sem localStorage */ }
+    applyTouchMode();
+  }
 
   /* ---------------------------------------------------------------- utils */
 
@@ -304,9 +360,32 @@ var DEFAULT_MIRROR_FILES = [
         var factory = mod.default || mod;
         return factory({
           canvas: canvas,
+          /* O Emscripten procura o wasm com o nome cru (th06.wasm); o site
+             usa o nome com o sufixo _bg, que e o do wasm-pack. */
+          locateFile: function (path) {
+            return wasmModuleUrl().replace(/[^/]+$/, "th06_bg.wasm");
+          },
           print: function (t) { console.log("[th06] " + t); },
           printErr: function (t) { console.error("[th06] " + t); }
         });
+      })
+      .then(function (Module) {
+        /* Deixa o modulo a mao, para o console (e os testes) poderem
+           chamar as funcoes exportadas do motor. */
+        window.__th06Module = Module;
+        /* Liga (ou desliga) os controles na tela, conforme o botao. */
+        applyTouchMode();
+        /* A fonte: o motor procura "NotoSans-Regular.ttf" na pasta de
+           trabalho, e sem ela nenhum texto do jogo aparece. */
+        return fetch("assets/NotoSans-Regular.ttf")
+          .then(function (r) { return r.arrayBuffer(); })
+          .then(function (buf) {
+            Module.FS.writeFile("/NotoSans-Regular.ttf", new Uint8Array(buf));
+          })
+          .catch(function (e) {
+            console.warn("[th06] nao consegui pegar a fonte: " + e);
+          })
+          .then(function () { return Module; });
       })
       .then(function (Module) {
         Object.keys(map).forEach(function (name) {
@@ -322,13 +401,23 @@ var DEFAULT_MIRROR_FILES = [
           }
           Module.FS.writeFile(path, map[name]);
         });
-        Module.th06_start();
+        /* O Emscripten exporta o simbolo com o underscore delante
+           (Module["_th06_start"]); o nome exato depende da versao, entao
+           a gente aceita os dois. */
+        var start = Module["_th06_start"] || Module["th06_start"];
+        if (typeof start !== "function") {
+          throw new Error("o motor nao exportou th06_start");
+        }
+        start();
         return Module;
       })
       .then(function () {
         document.body.classList.add("playing");
         canvas.addEventListener("dblclick", toggleFullscreen);
         canvas.focus();
+        /* O botao do modo touch continua na tela durante o jogo, para
+           poder ligar e desligar os controles na hora. */
+        if (el.touchFloatBtn) el.touchFloatBtn.hidden = false;
         setStatus("");
         hideProgress();
         busy(false);
@@ -479,7 +568,7 @@ var DEFAULT_MIRROR_FILES = [
   /* -------------------------------------------------------- fullscreen */
 
   function toggleFullscreen() {
-    var canvas = document.getElementById("th06-canvas");
+    var canvas = document.getElementById("canvas");
     if (!canvas) return;
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -508,6 +597,21 @@ var DEFAULT_MIRROR_FILES = [
 
   function init() {
     renderRequirements();
+    applyTouchMode();
+
+    /* Os botoes do modo touch (o do launcher e o que fica por cima do
+       jogo). */
+    if (el.touchBtn) el.touchBtn.addEventListener("click", toggleTouchMode);
+    if (el.touchFloatBtn) el.touchFloatBtn.addEventListener("click", toggleTouchMode);
+
+    /* Teste automatico: ?autotest=1 carrega do espelho e comeca o jogo,
+       sem precisar de clicar. */
+    if (new URLSearchParams(window.location.search).has("autotest")) {
+      setTimeout(function () {
+        var b = document.getElementById("hostBtn");
+        if (b) b.click();
+      }, 300);
+    }
 
     /* botão "selecionar pasta" */
     if (el.pickBtn && el.input) {

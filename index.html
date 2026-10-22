@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Touhou 6 — 東方紅魔郷 · WebAssembly</title>
-<meta name="description" content="Touhou 6: the Embodiment of Scarlet Devil rodando direto no navegador, em Rust + WebAssembly. Sem emulador, sem instalar nada." />
+<meta name="description" content="Touhou 6: the Embodiment of Scarlet Devil rodando direto no navegador, em C++ + WebAssembly. Sem emulador, sem instalar nada." />
 <meta name="theme-color" content="#0a0910" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +19,7 @@
   <div class="wrap site-header__inner">
     <div class="game-brand">
       <span class="game-brand__jp">東方紅魔郷</span>
-      <span class="game-brand__en">Touhou 6<small>WebAssembly · Rust</small></span>
+      <span class="game-brand__en">Touhou 6<small>WebAssembly · C++</small></span>
     </div>
     <a class="backlink" data-config="portalUrl" data-config-attr="href" href="../PortalDosGames/">← Portal dos Games</a>
   </div>
@@ -32,7 +32,7 @@
     <p class="launcher__jp">東方紅魔郷</p>
     <h1 class="launcher__title">Touhou 6<br /><em>the Embodiment of Scarlet Devil</em></h1>
     <p class="launcher__lead">
-      O bullet-hell clássico de ZUN, reconstruído do zero em Rust e compilado
+      O bullet-hell clássico de ZUN: o motor original em C++, compilado
       para WebAssembly. Roda os arquivos <strong>originais</strong> do jogo
       dentro do seu navegador — 640×480, 60 Hz, WebGL2 e Web Audio. Nenhum
       emulador, nenhuma instalação.
@@ -53,6 +53,7 @@
         <button class="btn btn--host" id="hostBtn" type="button">🌐 Carregar do espelho</button>
         <button class="btn btn--gold" id="resumeBtn" type="button" hidden>▶ Continuar (arquivos salvos)</button>
         <button class="btn btn--ghost btn--sm" id="clearCacheBtn" type="button" hidden>Apagar cache local</button>
+        <button class="btn btn--touch" id="touchBtn" type="button" aria-pressed="false">📱 Modo touch: desligado</button>
       </div>
       <input id="folderInput" type="file" webkitdirectory directory multiple />
     </div>
@@ -83,10 +84,15 @@
               <tr><td><kbd>Z</kbd></td><td>Atirar / confirmar</td></tr>
               <tr><td><kbd>X</kbd></td><td>Bomb / voltar</td></tr>
               <tr><td><kbd>Shift</kbd></td><td>Foco (movimento lento)</td></tr>
+              <tr><td><kbd>Enter</kbd></td><td>Confirmar (nos menus)</td></tr>
               <tr><td><kbd>Esc</kbd></td><td>Pausa / voltar</td></tr>
               <tr><td><kbd>F</kbd></td><td>Tela cheia</td></tr>
             </tbody>
           </table>
+          <p class="card__text" style="margin:14px 0 0">
+            No celular, ligue o <strong>Modo touch</strong> (o botão acima, ao
+            lado de “Carregar do espelho”) para ter os botões virtuais na tela.
+          </p>
         </div>
       </div>
     </section>
@@ -133,34 +139,36 @@
     <section class="section section--tight">
       <div class="wrap">
         <div class="section__head">
-          <h2 class="section__title">Sobre este port <small>Rust + WebAssembly</small></h2>
+          <h2 class="section__title">Sobre este port <small>C++ + WebAssembly</small></h2>
         </div>
         <div class="info-grid">
           <div class="panel">
             <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Motor</h3>
             <p class="card__text" style="margin-bottom:0">
-              Reimplementação completa do motor do jogo: formatos PBG3, ANM,
-              ECL, STD e MSG, a VM de animações, o interpretador de ECL que
-              roda os padrões de tiro originais, o jogador com shot tiers,
-              hitbox e graze, e os seis estágios com seus chefes e
-              spellcards.
+              O motor original do jogo em C++ (<strong>GensokyoClub/th06</strong>),
+              compilado para WebAssembly: os formatos PBG3, ANM, ECL, STD e
+              MSG, a VM de animações, o interpretador de ECL que roda os
+              padrões de tiro originais, o jogador com shot tiers, hitbox e
+              graze, e os seis estágios com seus chefes e spellcards.
             </p>
           </div>
           <div class="panel">
             <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Diferenças</h3>
             <p class="card__text" style="margin-bottom:0">
-              <strong>60 Hz fixos</strong> — a lógica roda a passo fixo,
-              desacoplada do refresh do monitor. <strong>Sem sumiço</strong> —
-              o jogo original engasgava em 30/60 alternando. <strong>Pausa
-              funcional</strong> e <strong>crash report</strong> em vez de
-              sumir sem aviso.
+              <strong>60 Hz no navegador</strong> — o laço do jogo usa o
+              <code>requestAnimationFrame</code> e o relógio do próprio motor.
+              <strong>Teclado e toque</strong> — o teclado funciona como no PC
+              (Z, X, Shift, Esc e as setas) e há botões virtuais para o
+              celular, que você liga e desliga no botão “Modo touch”.
+              <strong>Sem sumiço</strong> — a música é tocada pelo
+              <em>Web Audio</em>, com o Ogg Vorbis decodificado pelo motor.
             </p>
           </div>
           <div class="panel">
             <h3 class="card__title" style="font-size:.98rem;margin-bottom:10px">Créditos</h3>
             <p class="card__text" style="margin-bottom:0">
               <strong>ZUN</strong> — pelo jogo.<br />
-              <strong>TheScreamer74/Touhou6</strong> — pelo motor em Rust.<br />
+              <strong>GensokyoClub/th06</strong> — pelo motor em C++.<br />
               <strong>happyhavoc / GensokokyoClub th06</strong> — pela
               decompilação de referência.
             </p>
@@ -188,6 +196,7 @@
 </footer>
 
 <button id="fsBtn" title="Tela cheia (F)">⛶ Tela cheia</button>
+<button id="touchBtnFloat" class="touch-float" type="button" aria-pressed="false" hidden>📱 TOUCH</button>
 
 <script src="assets/js/zip.js"></script>
 <script src="assets/js/game.js"></script>

@@ -258,6 +258,41 @@ body.playing #fsBtn { display: none; }
   width: min(100vw, 177.778vh) !important;
   height: auto !important;
   max-height: 100vh;
+  /* Sem isso o navegador rola a pagina quando o dedo arrasta no jogo. */
+  touch-action: none;
+}
+
+/* O botao do modo touch, que fica por cima do jogo. */
+.touch-float {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 10;
+  opacity: 0.55;
+  background: var(--surface);
+  color: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: opacity .15s ease, border-color .15s ease;
+}
+.touch-float:hover { opacity: 1; }
+.touch-float.is-on { border-color: var(--gold); color: var(--gold); opacity: 0.9; }
+
+/* O botao do modo touch no launcher. */
+.btn--touch {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-dim);
+}
+.btn--touch:hover { border-color: var(--gold); color: var(--gold); }
+.btn--touch.is-on {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(232, 180, 74, 0.12);
 }
 
 #canvas:fullscreen {
