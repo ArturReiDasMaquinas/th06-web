@@ -85,8 +85,7 @@ var DEFAULT_MIRROR_FILES = [
     fileList: $("fileList"),
     fsBtn: $("fsBtn"),
     reqList: $("reqList"),
-    touchBtn: $("touchBtn"),
-    touchFloatBtn: $("touchBtnFloat")
+    touchBtn: $("touchBtn")
   };
 
   /* --------------------------------------------------------- modo touch */
@@ -122,11 +121,6 @@ var DEFAULT_MIRROR_FILES = [
       el.touchBtn.textContent = "📱 Modo touch: " + label;
       el.touchBtn.setAttribute("aria-pressed", touchEnabled ? "true" : "false");
       el.touchBtn.classList.toggle("is-on", touchEnabled);
-    }
-    if (el.touchFloatBtn) {
-      el.touchFloatBtn.textContent = touchEnabled ? "📱 TOUCH: on" : "📱 TOUCH: off";
-      el.touchFloatBtn.setAttribute("aria-pressed", touchEnabled ? "true" : "false");
-      el.touchFloatBtn.classList.toggle("is-on", touchEnabled);
     }
 
     var mod = window.__th06Module;
@@ -434,9 +428,6 @@ var DEFAULT_MIRROR_FILES = [
         /* O foco fica no canvas: e ele que recebe as teclas do jogo. */
         canvas.focus();
         try { window.focus(); } catch (e) { /* o navegador nao deixa */ }
-        /* O botao do modo touch continua na tela durante o jogo, para
-           poder ligar e desligar os controles na hora. */
-        if (el.touchFloatBtn) el.touchFloatBtn.hidden = false;
         setStatus("");
         hideProgress();
         busy(false);
@@ -618,15 +609,11 @@ var DEFAULT_MIRROR_FILES = [
     renderRequirements();
     applyTouchMode();
 
-    /* Os botoes do modo touch (o do launcher e o que fica por cima do
-       jogo). O mousedown e cancelado para o foco ficar no canvas. */
+    /* O botao do modo touch. O mousedown e cancelado para o foco
+       ficar no canvas. */
     if (el.touchBtn) {
       el.touchBtn.addEventListener("mousedown", keepFocusOnGame);
       el.touchBtn.addEventListener("click", toggleTouchMode);
-    }
-    if (el.touchFloatBtn) {
-      el.touchFloatBtn.addEventListener("mousedown", keepFocusOnGame);
-      el.touchFloatBtn.addEventListener("click", toggleTouchMode);
     }
 
     /* Teste automatico: ?autotest=1 carrega do espelho e comeca o jogo,

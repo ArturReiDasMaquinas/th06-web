@@ -101,8 +101,9 @@ Detalhes que só aparecem no navegador:
 - **Teclado:** setas para mover, `Z` atira/confirma, `X` bomba/volta,
   `Shift` foco, `Enter` confirma nos menus, `Esc` pausa/volta, `F` tela cheia.
 - **Toque:** o botão **“Modo touch”** (ao lado de “Carregar do espelho”)
-  liga e desliga os botões virtuais nas tarjas pretas. Fica ligado sozinho
-  em telas de toque, e a escolha é guardada no navegador.
+  liga e desliga os botões virtuais nas tarjas pretas — antes de abrir o
+  jogo. Fica ligado sozinho em telas de toque, e a escolha é guardada
+  no navegador.
 
 ## Estrutura
 
